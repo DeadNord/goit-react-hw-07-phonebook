@@ -1,27 +1,45 @@
 import s from './Contacts.module.css';
 import Contact from './Contact';
+import { useEffect } from 'react';
+
+import Loader from 'react-loader-spinner';
+import 'react-loader-spinner/dist/loader/css/react-spinner-loader.css';
 
 import { useSelector, useDispatch } from 'react-redux';
-import contactsActions from '../../../redux/contacts/contacts-actions';
-import { getContacts } from '../../../redux/contacts/contacts-selectors';
+import {
+  getContacts,
+  getLoading,
+} from '../../../redux/contacts/contacts-selectors';
+import {
+  fetchContacts,
+  deleteContact,
+} from '../../../redux/contacts/contacts-operations';
 
 export default function Contacts() {
   const contacts = useSelector(getContacts);
+  const loading = useSelector(getLoading);
 
   const dispatch = useDispatch();
-  const deleteContact = id => dispatch(contactsActions.deleteContact(id));
+  // const deleteContact = id => dispatch(deleteContact(id));
+
+  useEffect(() => {
+    dispatch(fetchContacts());
+  }, [dispatch]);
 
   return (
     <>
-      {contacts.length > 0 && (
+      {loading === true && (
+        <Loader type="Puff" color="#00BFFF" height={160} width={160} />
+      )}
+      {loading !== true && contacts.length > 0 && (
         <ul className={s.contactsList}>
           {contacts.map(item => (
             <Contact
               key={item.id}
-              name={item.data.name}
-              number={item.data.number}
+              name={item.name}
+              number={item.phone}
               id={item.id}
-              deleteContact={deleteContact}
+              deleteContact={id => dispatch(deleteContact(id))}
             />
           ))}
         </ul>
