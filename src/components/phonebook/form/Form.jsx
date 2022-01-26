@@ -1,12 +1,20 @@
 import { useState } from 'react';
 import s from './Form.module.css';
+import { alert } from '@pnotify/core';
+import '@pnotify/core/dist/PNotify.css';
+import '@pnotify/core/dist/BrightTheme.css';
 
-import { useDispatch } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { addContact } from '../../../redux/contacts/contacts-operations';
+import { getItems } from '../../../redux/contacts/contacts-selectors';
 
 export default function Form() {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
+
+  const contacts = useSelector(getItems);
+  const dispatch = useDispatch();
+  const onSubmit = data => dispatch(addContact(data));
 
   const handleChange = e => {
     const { name, value } = e.currentTarget;
@@ -23,18 +31,24 @@ export default function Form() {
   };
 
   const handleSubmit = e => {
+    const existContacts = contacts.find(elem => elem.name.includes(name));
     e.preventDefault();
-    onSubmit({ name, phone });
-    reset();
+
+    if (existContacts) {
+      alert({
+        title: 'Alert',
+        text: `${existContacts.name} is already in contacts`,
+      });
+    } else {
+      onSubmit({ name, phone });
+      reset();
+    }
   };
 
   const reset = () => {
     setName('');
     setPhone('');
   };
-
-  const dispatch = useDispatch();
-  const onSubmit = data => dispatch(addContact(data));
 
   return (
     <form className={s.form} onSubmit={handleSubmit}>
